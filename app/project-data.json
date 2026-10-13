@@ -1,0 +1,52 @@
+{
+  "projects": [
+    {
+      "name": "Customer Portal Redesign",
+      "owner": "Priya Nair",
+      "status": "on-track",
+      "recentActivity": "Usability test round 2 completed on Oct 9",
+      "priority": "high",
+      "summary": "Refreshes the self-service portal with simpler navigation and a faster ticket submission flow."
+    },
+    {
+      "name": "Payments API Migration",
+      "owner": "Marcus Lee",
+      "status": "at-risk",
+      "recentActivity": "Vendor sandbox outage delayed integration tests on Oct 8",
+      "priority": "high",
+      "summary": "Moves card processing to the new payments provider ahead of the year-end contract expiry."
+    },
+    {
+      "name": "Mobile App Offline Mode",
+      "owner": "Sofia Alvarez",
+      "status": "blocked",
+      "recentActivity": "Waiting on security review sign-off since Oct 3",
+      "priority": "medium",
+      "summary": "Lets field staff view and edit assignments without connectivity and sync when back online."
+    },
+    {
+      "name": "Data Warehouse Cleanup",
+      "owner": "Tom Becker",
+      "status": "completed",
+      "recentActivity": "Final archive job verified and closed on Oct 5",
+      "priority": "low",
+      "summary": "Retired unused tables and reduced monthly storage costs by roughly a third."
+    },
+    {
+      "name": "Onboarding Docs Refresh",
+      "owner": "Aisha Khan",
+      "status": "on-track",
+      "recentActivity": "Setup guide rewritten and reviewed on Oct 10",
+      "priority": "medium",
+      "summary": "Updates contributor documentation so new teammates can get productive in their first week."
+    },
+    {
+      "name": "Internal Analytics Dashboard",
+      "owner": "Daniel Okafor",
+      "status": "at-risk",
+      "recentActivity": "Scope discussion for new KPI set on Oct 11",
+      "priority": "low",
+      "summary": "Consolidates team metrics into one view; requirements are still shifting between stakeholders."
+    }
+  ]
+}

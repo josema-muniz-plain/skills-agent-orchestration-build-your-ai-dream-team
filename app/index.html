@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Pulse</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f4fd8'/%3E%3Cpath d='M3 17h7l3-8 5 15 3-7h8' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>Project Pulse</h1>
+    <p class="tagline">A quick look at project status, activity and priority.</p>
+  </header>
+
+  <section class="summary" aria-label="Summary" id="summary"></section>
+
+  <main class="dashboard" id="dashboard" aria-live="polite">
+    <p class="state state--loading" role="status">Loading projects…</p>
+  </main>
+
+  <script>
+    (function () {
+      var KNOWN_STATUSES = ['on-track', 'at-risk', 'blocked', 'completed'];
+      var KNOWN_PRIORITIES = ['high', 'medium', 'low'];
+      var dashboard = document.getElementById('dashboard');
+      var summary = document.getElementById('summary');
+
+      function humanise(value) {
+        var text = String(value == null || value === '' ? 'unknown' : value)
+          .replace(/[-_]+/g, ' ').trim();
+        return text.charAt(0).toUpperCase() + text.slice(1);
+      }
+
+      function normalise(value, known) {
+        var key = String(value == null ? '' : value).toLowerCase().trim();
+        return known.indexOf(key) !== -1 ? key : 'unknown';
+      }
+
+      function text(value, fallback) {
+        return value == null || value === '' ? fallback : String(value);
+      }
+
+      function el(tag, className, content) {
+        var node = document.createElement(tag);
+        if (className) node.className = className;
+        if (content !== undefined) node.textContent = content;
+        return node;
+      }
+
+      function showState(kind, message) {
+        dashboard.textContent = '';
+        var p = el('p', 'state state--' + kind, message);
+        p.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+        dashboard.appendChild(p);
+      }
+
+      function renderSummary(projects) {
+        summary.textContent = '';
+        var counts = { 'on-track': 0, 'at-risk': 0, 'blocked': 0, 'completed': 0 };
+        projects.forEach(function (project) {
+          var status = normalise(project && project.status, KNOWN_STATUSES);
+          if (status in counts) counts[status] += 1;
+        });
+        [
+          [projects.length, 'Total projects'],
+          [counts['on-track'], 'On track'],
+          [counts['at-risk'], 'At risk'],
+          [counts['blocked'], 'Blocked'],
+          [counts['completed'], 'Completed']
+        ].forEach(function (item) {
+          var stat = el('div', 'stat');
+          stat.appendChild(el('span', 'stat__value', String(item[0])));
+          stat.appendChild(el('span', 'stat__label', item[1]));
+          summary.appendChild(stat);
+        });
+      }
+
+      function renderCard(project) {
+        var item = project || {};
+        var status = normalise(item.status, KNOWN_STATUSES);
+        var priority = normalise(item.priority, KNOWN_PRIORITIES);
+
+        var card = el('article', 'project-card project-card--' + status);
+        var header = el('header', 'project-card__header');
+        header.appendChild(el('h2', 'project-card__name', text(item.name, 'Untitled project')));
+        header.appendChild(el('span', 'badge badge--' + status, humanise(status === 'unknown' ? item.status : status)));
+        card.appendChild(header);
+
+        card.appendChild(el('p', 'project-card__owner', 'Owner: ' + text(item.owner, 'Unassigned')));
+        card.appendChild(el('p', 'project-card__summary', text(item.summary, 'No summary provided.')));
+
+        var meta = el('dl', 'project-card__meta');
+        meta.appendChild(el('dt', null, 'Recent activity'));
+        meta.appendChild(el('dd', null, text(item.recentActivity, 'No recent activity')));
+        meta.appendChild(el('dt', null, 'Priority'));
+        var dd = el('dd');
+        dd.appendChild(el('span', 'priority priority--' + priority, humanise(priority === 'unknown' ? item.priority : priority)));
+        meta.appendChild(dd);
+        card.appendChild(meta);
+        return card;
+      }
+
+      fetch('project-data.json')
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error('Request failed with status ' + response.status);
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          if (!data || !Array.isArray(data.projects)) {
+            throw new Error('Data is missing a "projects" array.');
+          }
+          renderSummary(data.projects);
+          if (data.projects.length === 0) {
+            showState('empty', 'No projects to show yet.');
+            return;
+          }
+          dashboard.textContent = '';
+          data.projects.forEach(function (project) {
+            dashboard.appendChild(renderCard(project));
+          });
+        })
+        .catch(function (error) {
+          summary.textContent = '';
+          showState('error', 'Could not load projects. ' + error.message);
+        });
+    })();
+  </script>
+</body>
+</html>
